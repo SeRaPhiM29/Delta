@@ -1,41 +1,47 @@
 <?php
-require 'vendor/autoload.php';
-
-use PhpOffice\PhpSpreadsheet\Spreadsheet;
-use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
-
 $data_file = "uploads/parsed_output.json";
 
-if (!file_exists($data_file)) {
-    die("No data to export.");
+$data = [];
+if (file_exists($data_file)) {
+    $json = file_get_contents($data_file);
+    $data = json_decode($json, true);
 }
+?>
 
-$data = json_decode(file_get_contents($data_file), true);
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Parsed STDF Data</title>
+</head>
+<body>
+    <h2>Parsed STDF Data</h2>
 
-$spreadsheet = new Spreadsheet();
-$sheet = $spreadsheet->getActiveSheet();
+    <?php if (!empty($data)): ?>
+        <table border="1" cellpadding="5">
+            <tr>
+                <th>Test Number</th>
+                <th>Site Number</th>
+                <th>Result</th>
+                <th>Test Text</th>
+                <th>Head Number</th>
+            </tr>
+            <?php foreach ($data as $row): ?>
+                <tr>
+                    <td><?= htmlspecialchars($row['test_number']) ?></td>
+                    <td><?= htmlspecialchars($row['site_num']) ?></td>
+                    <td><?= htmlspecialchars($row['result']) ?></td>
+                    <td><?= htmlspecialchars($row['test_text']) ?></td>
+                    <td><?= htmlspecialchars($row['head_num']) ?></td>
+                </tr>
+            <?php endforeach; ?>
+        </table>
 
-// Set headers
-$headers = ['Test Number', 'Site Number', 'Result', 'Test Text', 'Head Number'];
-$sheet->fromArray($headers, NULL, 'A1');
+        <form action="export_excel.php" method="post">
+            <input type="submit" value="Export to Excel">
+        </form>
 
-// Set data rows
-$row_num = 2;
-foreach ($data as $row) {
-    $sheet->fromArray([
-        $row['test_number'],
-        $row['site_num'],
-        $row['result'],
-        $row['test_text'],
-        $row['head_num']
-    ], NULL, 'A' . $row_num++);
-}
-
-// Output to browser
-header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-header('Content-Disposition: attachment;filename="parsed_data.xlsx"');
-header('Cache-Control: max-age=0');
-
-$writer = new Xlsx($spreadsheet);
-$writer->save('php://output');
-exit;
+    <?php else: ?>
+        <p>No data to display.</p>
+    <?php endif; ?>
+</body>
+</html>

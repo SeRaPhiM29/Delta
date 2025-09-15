@@ -1,0 +1,15 @@
+{
+    "name": "pi/delta",
+    "type": "project",
+    "autoload": {
+        "psr-4": {
+            "Pi\\Delta\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Neil Delos Reyes"
+        }
+    ],
+    "require": {}
+}

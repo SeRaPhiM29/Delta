@@ -1,34 +1,41 @@
-import sys
-import json
-from ezstdf.stdf_reader import StdfReader
+<?php
+require 'vendor/autoload.php';
 
-def parse_stdf(file_path):
-    results = []
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
-    for record in StdfReader(file_path):
-        if record.id == 'PTR':  # Parametric Test Record
-            results.append({
-                'test_number': record.test_num,
-                'site_num': record.site_num,
-                'result': record.result,
-                'test_text': record.test_txt,
-                'head_num': record.head_num
-            })
+$data_file = "uploads/parsed_output.json";
 
-    return results
+if (!file_exists($data_file)) {
+    die("No data to export.");
+}
 
-if __name__ == '__main__':
-    if len(sys.argv) != 3:
-        print("Usage: python3 parse_stdf.py input.stdf output.json")
-        sys.exit(1)
+$data = json_decode(file_get_contents($data_file), true);
 
-    input_file = sys.argv[1]
-    output_file = sys.argv[2]
+$spreadsheet = new Spreadsheet();
+$sheet = $spreadsheet->getActiveSheet();
 
-    try:
-        parsed_data = parse_stdf(input_file)
-        with open(output_file, 'w') as f:
-            json.dump(parsed_data, f, indent=2)
-    except Exception as e:
-        print(f"Error: {e}")
-        sys.exit(1)
+// Set headers
+$headers = ['Test Number', 'Site Number', 'Result', 'Test Text', 'Head Number'];
+$sheet->fromArray($headers, NULL, 'A1');
+
+// Set data rows
+$row_num = 2;
+foreach ($data as $row) {
+    $sheet->fromArray([
+        $row['test_number'],
+        $row['site_num'],
+        $row['result'],
+        $row['test_text'],
+        $row['head_num']
+    ], NULL, 'A' . $row_num++);
+}
+
+// Output to browser
+header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+header('Content-Disposition: attachment;filename="parsed_data.xlsx"');
+header('Cache-Control: max-age=0');
+
+$writer = new Xlsx($spreadsheet);
+$writer->save('php://output');
+exit;

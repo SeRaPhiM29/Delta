@@ -1,25 +1,34 @@
-<?php
-$target_dir = "uploads/";
-if (!file_exists($target_dir)) {
-    mkdir($target_dir, 0777, true);
-}
+import sys
+import json
+from ezstdf.stdf_reader import StdfReader
 
-$uploaded_file = $target_dir . basename($_FILES["stdf_file"]["name"]);
+def parse_stdf(file_path):
+    results = []
 
-if (move_uploaded_file($_FILES["stdf_file"]["tmp_name"], $uploaded_file)) {
-    $output_json = $target_dir . "parsed_output.json";
-    $python_path = "/home/pi/myenv/bin/python";
-    $cmd = escapeshellcmd("$python_path parse_stdf.py $uploaded_file $output_json");
-    $output = shell_exec($cmd . " 2>&1");
+    for record in StdfReader(file_path):
+        if record.id == 'PTR':  # Parametric Test Record
+            results.append({
+                'test_number': record.test_num,
+                'site_num': record.site_num,
+                'result': record.result,
+                'test_text': record.test_txt,
+                'head_num': record.head_num
+            })
 
-    if (!file_exists($output_json)) {
-        echo "Error running parser:<br><pre>$output</pre>";
-        exit;
-    }
+    return results
 
-    header("Location: display.php");
-    exit;
-} else {
-    echo "Failed to upload file";
-}
-?>
+if __name__ == '__main__':
+    if len(sys.argv) != 3:
+        print("Usage: python3 parse_stdf.py input.stdf output.json")
+        sys.exit(1)
+
+    input_file = sys.argv[1]
+    output_file = sys.argv[2]
+
+    try:
+        parsed_data = parse_stdf(input_file)
+        with open(output_file, 'w') as f:
+            json.dump(parsed_data, f, indent=2)
+    except Exception as e:
+        print(f"Error: {e}")
+        sys.exit(1)
