@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>STDF Parser</title>
+    {{ css }}
+</head>
+<body>
+    <h2>Select an STDF File</h2>
+    <form method="POST" enctype="multipart/form-data">
+        <input type="file" name="stdf_file" accept=".stdf" required>
+        <button type="submit">Parse File</button>
+    </form>
+</body>
+</html>

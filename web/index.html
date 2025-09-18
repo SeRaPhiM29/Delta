@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>STDF Delta Comparison</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        #loading {
+            display: none;
+            margin-top: 20px;
+            font-weight: bold;
+            color: #4CAF50;
+        }
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #4CAF50;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <h2>Upload STDF Files</h2>
+    <form method="POST" enctype="multipart/form-data" onsubmit="showLoading()">
+        <label>T1 Data:</label><br>
+        <input type="file" name="t1_file" accept=".stdf" required><br><br>
+        <label>T2 Data:</label><br>
+        <input type="file" name="t2_file" accept=".stdf" required><br><br>
+
+        <h3>Select Test Numbers for Delta Computation</h3>
+        <table id="testTable" border="1">
+            <tr>
+                <th>Test Number</th>
+                <th>Delta Limit</th>
+            </tr>
+            <tr>
+                <td><input type="text" name="test_num[]" required></td>
+                <td><input type="number" step="any" name="delta_limit[]" required></td>
+            </tr>
+        </table>
+        <button type="button" onclick="addRow()">Add Row</button><br><br>
+
+        <button type="submit">Parse and Compare</button>
+    </form>
+
+    <div id="loading">
+        <span class="spinner"></span> Processing STDF files...
+    </div>
+
+    <script>
+        function addRow() {
+            var table = document.getElementById("testTable");
+            var row = table.insertRow();
+            var cell1 = row.insertCell(0);
+            var cell2 = row.insertCell(1);
+            cell1.innerHTML = '<input type="text" name="test_num[]" required>';
+            cell2.innerHTML = '<input type="number" step="any" name="delta_limit[]" required>';
+        }
+        function showLoading() {
+            document.getElementById('loading').style.display = 'block';
+        }
+    </script>
+</body>
+</html>
